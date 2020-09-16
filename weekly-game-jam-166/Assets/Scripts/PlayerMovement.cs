@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -25,6 +26,33 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
+    void Update()
+    {
+        if (Input.GetButtonDown("Jump") && canJump) {
+            rb.AddForce(new Vector2(0, jumpForce));
+            canJump = false;
+        }
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, 0.1f, m_WhatIsGround);
+
+        canJump = false;
+		for (int i = 0; i < colliders.Length; i++) {
+			if (colliders[i].gameObject != gameObject) {
+				canJump = true;
+			}
+		}
+
+        // mouse button click
+
+        if (Input.GetMouseButtonDown(0)) {
+            Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            GameObject newSeed = Instantiate(seed, transform.position, Quaternion.identity);
+            Vector2 seedForce = new Vector2(worldPoint.x - transform.position.x, worldPoint.y - transform.position.y);
+
+            newSeed.GetComponent<Rigidbody2D>().AddForce(seedForce * 200);
+        }
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -44,20 +72,6 @@ public class PlayerMovement : MonoBehaviour
         transform.Translate(
             new Vector3(movement.x * speed * Time.fixedDeltaTime, 0, 0)
         );
-
-        if (Input.GetButtonDown("Jump") && canJump) {
-            rb.AddForce(new Vector2(0, jumpForce));
-            canJump = false;
-        }
-
-		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, 0.1f, m_WhatIsGround);
-
-        canJump = false;
-		for (int i = 0; i < colliders.Length; i++) {
-			if (colliders[i].gameObject != gameObject) {
-				canJump = true;
-			}
-		}
     }
 
     void Flip()
@@ -65,4 +79,12 @@ public class PlayerMovement : MonoBehaviour
         isFacingRight = !isFacingRight;
         transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
     }
+
+/*
+    void OnBecameInvisible()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(scene.name);
+    }
+*/
 }
