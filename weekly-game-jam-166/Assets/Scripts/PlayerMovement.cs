@@ -10,10 +10,12 @@ public class PlayerMovement : MonoBehaviour
 
     public GameObject seed;
 
+    public Animator animator;
+
     public float speed = 2f;
     public float jumpForce = 100f;
 
-    bool canJump = true;
+    bool canJump = false;
     bool isFacingRight = true;
 
     private Rigidbody2D rb;
@@ -26,22 +28,29 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+        float moveHorizontal = Input.GetAxisRaw("Horizontal");
+        float moveVertical = Input.GetAxisRaw("Vertical");
 
         Vector2 movement = new Vector2(moveHorizontal, 0);
 
+        animator.SetBool("isRunning", moveHorizontal != 0);
+
+        if (moveHorizontal > 0 && !isFacingRight) {
+            Flip();
+        } else if (moveHorizontal < 0 && isFacingRight) {
+            Flip();
+        }
+
         transform.Translate(
-            new Vector3(movement.x * speed * Time.deltaTime, 0, 0)
+            new Vector3(movement.x * speed * Time.fixedDeltaTime, 0, 0)
         );
 
-        if (Input.GetKeyDown(KeyCode.UpArrow)) {
+        if (Input.GetButtonDown("Jump") && canJump) {
             rb.AddForce(new Vector2(0, jumpForce));
             canJump = false;
         }
 
-        bool prevJump = canJump;
-		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, 0.2f, m_WhatIsGround);
+		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, 0.1f, m_WhatIsGround);
 
         canJump = false;
 		for (int i = 0; i < colliders.Length; i++) {
@@ -49,5 +58,11 @@ public class PlayerMovement : MonoBehaviour
 				canJump = true;
 			}
 		}
+    }
+
+    void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
     }
 }
