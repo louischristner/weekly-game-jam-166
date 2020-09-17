@@ -198,6 +198,7 @@ MonoBehaviour:
     m_Bits: 256
   m_GroundCheck: {fileID: 2454758280224604788}
   seed: {fileID: 2208262780988003868, guid: f94ca510c41019e42817b38783058d75, type: 3}
+  seedManager: {fileID: 5439697889884013515, guid: c0c533b04ccf7734cb3e31d1f28070c1, type: 3}
   animator: {fileID: 2364977882072559681}
   speed: 1
   jumpForce: 100

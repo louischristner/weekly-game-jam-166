@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private Transform m_GroundCheck;   // A position marking where to check if the player is grounded.
 
     public GameObject seed;
+    public GameObject seedManager;
 
     public Animator animator;
 
@@ -21,9 +22,16 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody2D rb;
 
+    Vector3 playerPos;
+    int seedNbr;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        playerPos = transform.position;
+        int[] seedsPerLevel = {1, 1, 2, 3};
+        seedNbr = seedsPerLevel[SceneManager.GetActiveScene().buildIndex];
     }
 
     void Update()
@@ -44,12 +52,13 @@ public class PlayerMovement : MonoBehaviour
 
         // mouse button click
 
-        if (Input.GetMouseButtonDown(0)) {
+        if (Input.GetMouseButtonDown(0) && seedManager.GetComponent<SeedManager>().value > 0) {
             Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             GameObject newSeed = Instantiate(seed, transform.position, Quaternion.identity);
             Vector2 seedForce = new Vector2(worldPoint.x - transform.position.x, worldPoint.y - transform.position.y);
 
             newSeed.GetComponent<Rigidbody2D>().AddForce(seedForce * 200);
+            seedManager.GetComponent<SeedManager>().value -= 1;
         }
     }
 
@@ -83,15 +92,17 @@ public class PlayerMovement : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collider)
     {
         if (collider.gameObject.tag == "Finish") {
-            Debug.Log("Win!");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
     }
 
-/*
     void OnBecameInvisible()
     {
-        Scene scene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(scene.name);
+        transform.position = playerPos;
+        seedManager.GetComponent<SeedManager>().value = seedNbr;
+        var gameObjects = GameObject.FindGameObjectsWithTag("Tree");
+
+        for(var i = 0 ; i < gameObjects.Length ; i ++)
+            Destroy(gameObjects[i]);
     }
-*/
 }
